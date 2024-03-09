@@ -1,31 +1,81 @@
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 const NewCourse = () => {
+  const router = useRouter();
+  const { staffID } = router.query;
+
   const initialCourseData = {
-    title: "",
-    language: "",
+    CourseName: "",
+    CourseLanguage: "",
     Level: "beginner",
     description: "",
     subscriptionType: "monthly",
     teachingLevel: "beginner",
-    price: 0,
-    previewVideo: null,
+    Price: 0,
     totalHoursPerWeek: 4,
+    selectedWeek: "current",
     classSchedules: {
-      current: { Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null },
-      nextWeek: { Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null },
-      secondWeek: { Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null },
+      current: {
+        Mon: null,
+        Tue: null,
+        Wed: null,
+        Thu: null,
+        Fri: null,
+        Sat: null,
+        Sun: null,
+      },
+      nextWeek: {
+        Mon: null,
+        Tue: null,
+        Wed: null,
+        Thu: null,
+        Fri: null,
+        Sat: null,
+        Sun: null,
+      },
+      secondWeek: {
+        Mon: null,
+        Tue: null,
+        Wed: null,
+        Thu: null,
+        Fri: null,
+        Sat: null,
+        Sun: null,
+      },
     },
   };
 
   const [courseData, setCourseData] = useState(initialCourseData);
-  const [priceRange, setPriceRange] = useState({ min: 200, max: 300 });
-  const [selectedWeek, setSelectedWeek] = useState("current");
-  const [totalHoursPerWeek, setTotalHoursPerWeek] = useState(4);
+  const [PriceRange, setPriceRange] = useState({ min: 200, max: 300 });
   const [classSchedules, setClassSchedules] = useState({
-    current: { Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null },
-    nextWeek: { Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null },
-    secondWeek: { Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null },
+    current: {
+      Mon: null,
+      Tue: null,
+      Wed: null,
+      Thu: null,
+      Fri: null,
+      Sat: null,
+      Sun: null,
+    },
+    nextWeek: {
+      Mon: null,
+      Tue: null,
+      Wed: null,
+      Thu: null,
+      Fri: null,
+      Sat: null,
+      Sun: null,
+    },
+    secondWeek: {
+      Mon: null,
+      Tue: null,
+      Wed: null,
+      Thu: null,
+      Fri: null,
+      Sat: null,
+      Sun: null,
+    },
   });
 
   const handleFileChange = (e) => {
@@ -37,15 +87,91 @@ const NewCourse = () => {
     const value = e.target.value;
     setCourseData((prevData) => ({ ...prevData, [field]: value }));
   };
+  const extractClassSchedulesFromCourses = (courses) => {
+    const schedules = {};
+
+    courses.forEach((course) => {
+      Object.keys(course.classSchedules).forEach((week) => {
+        if (!schedules[week]) {
+          schedules[week] = {};
+        }
+
+        Object.keys(course.classSchedules[week]).forEach((day) => {
+          const slot = course.classSchedules[week][day];
+          if (slot) {
+            if (!schedules[week][day]) {
+              schedules[week][day] = [];
+            }
+            schedules[week][day].push(slot);
+          }
+        });
+      });
+    });
+
+    return schedules;
+  };
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch(`/api/allcourses?instructor=${staffID}`);
+        if (response.ok) {
+          const courses = await response.json();
+          console.log("Courses:", courses);
+
+          // Extracting class schedules from each course
+          const extractedSchedules = extractClassSchedulesFromCourses(courses);
+          console.log("Extracted Schedules:", extractedSchedules);
+
+          // Merge the extracted schedules into the state
+          setClassSchedules(extractedSchedules);
+        } else {
+          console.error("Failed to fetch courses");
+        }
+      } catch (error) {
+        console.error("An unexpected error occurred:", error);
+      }
+    };
+
+    if (staffID) {
+      fetchCourses();
+    }
+  }, [staffID]);
 
   const handleCreateCourse = async () => {
     try {
-      const response = await fetch("/api/newcourse", {
+      // Add staffID to courseData
+      const dataWithStaffID = { ...courseData, staffID };
+      const {
+        CourseName,
+        CourseLanguage,
+        description,
+        subscriptionType,
+        teachingLevel,
+        Price,
+        totalHoursPerWeek,
+        selectedWeek,
+        classSchedules,
+      } = dataWithStaffID;
+      console.log("Course created with the following data:", {
+        CourseName,
+        CourseLanguage,
+        description,
+        subscriptionType,
+        teachingLevel,
+        Price,
+        totalHoursPerWeek,
+        selectedWeek,
+        classSchedules,
+      });
+
+      console.log(dataWithStaffID);
+      console.log("dataWithStaffID" + dataWithStaffID);
+      const response = await fetch("/api/newcourse1", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(courseData),
+        body: JSON.stringify(dataWithStaffID),
       });
 
       if (response.ok) {
@@ -58,7 +184,6 @@ const NewCourse = () => {
       console.error("An unexpected error occurred:", error);
     }
   };
-
   useEffect(() => {
     if (courseData.teachingLevel === "beginner") {
       setPriceRange(
@@ -82,12 +207,16 @@ const NewCourse = () => {
   }, [courseData.subscriptionType, courseData.teachingLevel]);
 
   const handleSlotSelect = (day, slot) => {
+    console.log(day);
+    console.log(slot);
+    console.log(classSchedules);
+    const selectedWeek = courseData.selectedWeek;
     const currentWeekTotalHours = Object.values(
       classSchedules[selectedWeek]
     ).filter((selectedSlot) => selectedSlot !== null).length;
 
     if (
-      currentWeekTotalHours < totalHoursPerWeek ||
+      currentWeekTotalHours < courseData.totalHoursPerWeek ||
       classSchedules[selectedWeek][day] !== null
     ) {
       setClassSchedules((prevSchedules) => ({
@@ -97,26 +226,42 @@ const NewCourse = () => {
           [day]: classSchedules[selectedWeek][day] === slot ? null : slot,
         },
       }));
+      //changing the intial course data
+      setCourseData((prevCourseData) => ({
+        ...prevCourseData,
+        classSchedules: classSchedules,
+      }));
     }
   };
 
   const timeSlots = ["4pm-5pm", "5pm-6pm", "6pm-7pm", "7pm-8pm", "8pm-9pm"];
 
   useEffect(() => {
-    const currentWeekTotalHours = Object.values(
-      classSchedules[selectedWeek]
-    ).filter((selectedSlot) => selectedSlot !== null).length;
+    if (courseData.selectedWeek) {
+      const currentWeekTotalHours = Object.values(
+        classSchedules[courseData.selectedWeek]
+      ).filter((selectedSlot) => selectedSlot !== null).length;
 
-    if (currentWeekTotalHours > totalHoursPerWeek) {
-      setClassSchedules((prevSchedules) => ({
-        ...prevSchedules,
-        [selectedWeek]: {
-          Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null,
-        },
-      }));
+      if (currentWeekTotalHours > courseData.totalHoursPerWeek) {
+        setClassSchedules((prevSchedules) => ({
+          ...prevSchedules,
+          [courseData.selectedWeek]: {
+            Mon: null,
+            Tue: null,
+            Wed: null,
+            Thu: null,
+            Fri: null,
+            Sat: null,
+            Sun: null,
+          },
+        }));
+      }
     }
-  }, [totalHoursPerWeek, selectedWeek, classSchedules]);
-
+  }, [
+    courseData.totalHoursPerWeek,
+    courseData.selectedWeek,
+    courseData.classSchedules,
+  ]);
   return (
     <div className="flex items-center justify-center min-h-screen bg-white-500">
       <div className="bg-white-400 p-8 rounded-lg shadow-lg max-w-xl w-full mt-5 mb-5 text-black">
@@ -131,6 +276,8 @@ const NewCourse = () => {
           type="text"
           id="CourseName"
           name="CourseName"
+          value={courseData.CourseName}
+          onChange={(e) => handleInputChange(e, "CourseName")}
         />
 
         <label className="block mb-2" htmlFor="CourseLanguage">
@@ -141,6 +288,8 @@ const NewCourse = () => {
           type="text"
           id="CourseLanguage"
           name="CourseLanguage"
+          value={courseData.CourseLanguage}
+          onChange={(e) => handleInputChange(e, "CourseLanguage")}
           required
         />
 
@@ -151,6 +300,8 @@ const NewCourse = () => {
           className="w-full p-2 mb-4 border rounded"
           id="description"
           name="description"
+          value={courseData.description}
+          onChange={(e) => handleInputChange(e, "description")}
         ></textarea>
 
         {/* Subscription Type Dropdown */}
@@ -160,7 +311,7 @@ const NewCourse = () => {
           </label>
           <select
             value={courseData.subscriptionType}
-            onChange={(e) => setSubscriptionType(e.target.value)}
+            onChange={(e) => handleInputChange(e, "subscriptionType")}
             className="w-full p-2 mb-4 border rounded"
           >
             <option value="monthly">Monthly</option>
@@ -175,7 +326,7 @@ const NewCourse = () => {
           </label>
           <select
             value={courseData.teachingLevel}
-            onChange={(e) => setTeachingLevel(e.target.value)}
+            onChange={(e) => handleInputChange(e, "teachingLevel")}
             className="w-full p-2 mb-4 border rounded"
           >
             <option value="beginner">Beginner</option>
@@ -189,13 +340,13 @@ const NewCourse = () => {
           <label className="block mb-2 font-semibold">Enter Price:</label>
           <input
             type="number"
-            value={courseData.price}
-            onChange={(e) => setPrice(parseInt(e.target.value, 10))}
+            value={courseData.Price}
+            onChange={(e) => handleInputChange(e, "Price")}
             className="w-full p-2 border rounded"
-            min={priceRange.min}
-            max={priceRange.max}
+            min={PriceRange.min}
+            max={PriceRange.max}
           />
-          <p>{`Price Range: ₹${priceRange.min} - ₹${priceRange.max} per ${courseData.subscriptionType}`}</p>
+          <p>{`Price Range: ₹${PriceRange.min} - ₹${PriceRange.max} per ${courseData.subscriptionType}`}</p>
         </div>
 
         <label className="block mb-2" htmlFor="previewVideo">
@@ -217,8 +368,8 @@ const NewCourse = () => {
           </label>
           <input
             type="number"
-            value={totalHoursPerWeek}
-            onChange={(e) => setTotalHoursPerWeek(parseInt(e.target.value, 10))}
+            value={courseData.totalHoursPerWeek}
+            onChange={(e) => handleInputChange(e, "totalHoursPerWeek")}
             className="w-full p-2 border rounded"
           />
         </div>
@@ -227,8 +378,8 @@ const NewCourse = () => {
         <div className="mb-4">
           <label className="block mb-2 font-semibold">Select Week:</label>
           <select
-            value={selectedWeek}
-            onChange={(e) => setSelectedWeek(e.target.value)}
+            value={courseData.selectedWeek}
+            onChange={(e) => handleInputChange(e, "selectedWeek")}
             className="w-full p-2 mb-4 border rounded"
           >
             <option value="current">Current Week</option>
@@ -250,33 +401,53 @@ const NewCourse = () => {
               </tr>
             </thead>
             <tbody>
-              {Object.keys(classSchedules[selectedWeek]).map((day) => (
-                <tr key={day}>
-                  <td className="border p-2">{day}</td>
-                  <td className="border p-2">
-                    {timeSlots.map((slot) => (
-                      <button
-                        key={slot}
-                        onClick={() => handleSlotSelect(day, slot)}
-                        className={`p-1 m-1 border rounded ${
-                          classSchedules[selectedWeek][day] === slot
-                            ? "bg-blue-500 text-white"
-                            : "bg-white"
-                        }`}
-                      >
-                        {slot}
-                      </button>
-                    ))}
-                  </td>
-                </tr>
-              ))}
+              {Object.keys(classSchedules[courseData.selectedWeek] || {}).map(
+                (day) => (
+                  <tr key={day}>
+                    <td className="border p-2">{day}</td>
+                    <td className="border p-2">
+                      {timeSlots.map((slot) => {
+                        const isSlotOccupied =
+                          classSchedules[courseData.selectedWeek]?.[
+                            day
+                          ]?.includes(slot) ||
+                          (
+                            extractedSchedules[courseData.selectedWeek]?.[
+                              day
+                            ] || []
+                          ).includes(slot);
+
+                        return (
+                          <button
+                            key={slot}
+                            onClick={() => handleSlotSelect(day, slot)}
+                            className={`p-1 m-1 border rounded ${
+                              isSlotOccupied
+                                ? "bg-red-500 text-white"
+                                : classSchedules[courseData.selectedWeek][
+                                    day
+                                  ] === slot
+                                ? "bg-blue-500 text-white"
+                                : "bg-white"
+                            }`}
+                            disabled={isSlotOccupied}
+                          >
+                            {slot}
+                          </button>
+                        );
+                      })}
+                    </td>
+                  </tr>
+                )
+              )}
             </tbody>
           </table>
         </div>
 
         <button
           className="bg-blue-600 text-white p-2 rounded hover:bg-blue-500"
-          type="submit"
+          type="button"
+          onClick={handleCreateCourse}
         >
           Create Course
         </button>

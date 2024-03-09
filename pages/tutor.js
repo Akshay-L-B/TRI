@@ -225,8 +225,13 @@ const Tutor = ({ logout }) => {
                 <span className="mx-4 font-medium">My Account</span>
               </button>
 
-              <Link
-                href={"/video"}
+              <button
+                onClick={() => {
+                  router.push({
+                    pathname: "newcourse",
+                    query: { staffID: staffID },
+                  });
+                }}
                 className="flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 transform rounded-md dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"
               >
                 <svg
@@ -245,7 +250,7 @@ const Tutor = ({ logout }) => {
                 </svg>
 
                 <span className="mx-4 font-medium">Create A New Course</span>
-              </Link>
+              </button>
               <Link
                 href={"/viewcoursefeedback"}
                 className="flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 transform rounded-md dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"

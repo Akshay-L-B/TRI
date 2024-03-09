@@ -46,9 +46,12 @@ const EnrolledCourses = ({ user }) => {
     fetchCourses();
   }, [studentID]);
   const handleEditClick = (CourseCode) => {
-    const slug = `${CourseCode}`;
-    router.push(`/course_tutor/${slug}`);
+    router.push({
+      pathname: "/courseDetails",
+      query: { CourseCode: CourseCode, studentID: studentID },
+    });
   };
+
   const handleSeeEnrolledStudents = (CourseCode) => {
     const slug = `${CourseCode}`;
     router.push(`/EnrolledStudents/${slug}`);
@@ -56,101 +59,11 @@ const EnrolledCourses = ({ user }) => {
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   // Your component file
 
-  const handleEitClick = async (
-    CourseCode,
-    CourseTitle,
-    CourseDropDeadline
-  ) => {
-    // Show a confirmation dialog
-    const confirmed = window.confirm(
-      `Are you sure you want to drop the course: ${CourseCode} - ${CourseTitle}?`
-    );
-
-    if (!confirmed) {
-      // If the user cancels the action, do nothing
-      return;
-    }
-    const currentDateTime = new Date();
-    const deadline = new Date(CourseDropDeadline);
-    console.log(currentDateTime.getTime());
-    console.log(deadline.getTime());
-    if (currentDateTime.getTime() > deadline.getTime()) {
-      toast.error(
-        `Cannot drop the course ${CourseCode} Drop Deadline already passed!`,
-        {
-          position: "top-center",
-          autoClose: 1500,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        }
-      );
-      return;
-    }
-    try {
-      // Make API call to remove the course from the enrolled courses
-      const response = await fetch(
-        `/api/dropcourse?StudentID=${studentID}&CourseCode=${CourseCode}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const updatedData = initialData.filter(
-        (course) => course.CourseCode !== CourseCode
-      );
-
-      setFilteredData(updatedData);
-
-      // Display an alert to the student
-      alert(`Dropped course: ${CourseCode} - ${CourseTitle}`);
-
-      // Now, make a call to the student data modification API
-      const studentDataResponse = await fetch(
-        `/api/dropcoursestudent?StudentID=${studentID}&CourseCode=${CourseCode}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      console.log("The email of the recpeient is" + email);
-      const emailData = {
-        to: email, // replace with the recipient's email
-        subject: `Course Dropped ${CourseCode}`,
-        text: `You have successfully dropped the course: ${CourseCode} - ${CourseTitle}`,
-      };
-
-      try {
-        const emailResponse = await fetch("/api/send-email", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(emailData),
-        });
-
-        if (emailResponse.ok) {
-          const emailResult = await emailResponse.json();
-          if (!emailResult.success) {
-            console.error("Failed to send email:", emailResult.message);
-          }
-        } else {
-          console.error("Failed to send email:", emailResponse.statusText);
-        }
-      } catch (error) {
-        console.error("Error sending email:", error.message);
-      }
-    } catch (error) {
-      // Handle network or other errors
-      console.error("Error dropping course:", error.message);
-    }
+  const handleCourseFeedback = (CourseCode) => {
+    router.push({
+      pathname: "/coursefeedback",
+      query: { CourseCode: CourseCode, StudentID: studentID },
+    });
   };
 
   console.log("Hey how " + initialData);
@@ -190,7 +103,7 @@ const EnrolledCourses = ({ user }) => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {filteredData.map((course) => (
                         <div
-                          key={course.id}
+                          key={course.CourseCode}
                           className="relative overflow-hidden border border-teal-500 hover:border-2 rounded-lg transition-all"
                         >
                           <Link href="#">
@@ -202,15 +115,25 @@ const EnrolledCourses = ({ user }) => {
                           </Link>
                           <div className="p-3">
                             <p className="text-lg font-semibold line-clamp-2 mb-2">
-                              {course.title}
+                              {course.CourseName}
                             </p>
-                            <span className="italic text-sm text-gray-500">{`${course.CourseLanguage}-${course.CourseLevel}`}</span>
+                            <span className="italic text-sm text-gray-500">{`${course.CourseLanguage}-${course.Level}`}</span>
                             <div className="mt-2 flex space-x-4">
                               <button
-                                onClick={() => handleEditClick(course.id)}
+                                onClick={() =>
+                                  handleEditClick(course.CourseCode)
+                                }
                                 className="text-teal-500 hover:bg-teal-500 hover:text-white px-3 py-2 border border-teal-500 rounded-md transition-all duration-300"
                               >
                                 See Course Contents
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleCourseFeedback(course.CourseCode)
+                                }
+                                className="text-teal-500 hover:bg-teal-500 hover:text-white px-3 py-2 border border-teal-500 rounded-md transition-all duration-300"
+                              >
+                                Course Feedback
                               </button>
                             </div>
                           </div>

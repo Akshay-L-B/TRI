@@ -12,8 +12,8 @@ export default function Slug() {
       try {
         const response = await fetch(`/api/seestudents?CourseCode=${slug}`);
         const data = await response.json();
-        console.log(data);
-        setCourseData(data);
+        console.log(data[0]);
+        setCourseData(data[0]);
       } catch (error) {
         console.error("Error fetching the instructor courses:", error);
       }
@@ -92,9 +92,9 @@ export default function Slug() {
       />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <InfoCard title="Faculty Name" value={courseData.instructor} />
-        <InfoCard title="Level" value="Pro Max" />
-        <InfoCard title="Experience" value="20 yrs" />
-        <InfoCard title="Language" value="Spanish" />
+        <InfoCard title="Level" value={courseData.Level} />
+        <InfoCard title="Experience" value={courseData.Experience} />
+        <InfoCard title="Language" value={courseData.Language} />
       </div>
       <div className="p-6 mt-4 bg-white rounded-md shadow-md">
         <h2 className="text-xl font-semibold mb-4">Course Description</h2>

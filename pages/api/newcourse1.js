@@ -1,16 +1,21 @@
-import Course from "../../models/Course"; // Assuming Course is your mongoose model for courses
+import Course from "../../models/Course";
 import connectDb from "../../middleware/mongoose";
-const CryptoJS = require("crypto-js");
-require("dotenv").config();
 
 const handler = async (req, res) => {
   try {
     // Check if the request method is POST
     if (req.method === "POST") {
-      // Destructure relevant fields from the request body
-      const courseData = req.body;
+      // Extract course data from the request body
+      const dataWithStaffID = req.body; // Destructure dataWithStaffID
+      let CourseCode = Math.floor(Math.random() * 1000000000000000);
 
-      let course = new Course(courseData);
+      // Log the contents of dataWithStaffID separately
+      console.log("CourseData");
+      console.log("CourseCode:", CourseCode);
+      console.log("Other Data:", JSON.stringify(dataWithStaffID, null, 2));
+
+      // Create a new Course instance with the provided data
+      let course = new Course({ CourseCode, ...dataWithStaffID });
 
       // Save the course to the database
       await course.save();

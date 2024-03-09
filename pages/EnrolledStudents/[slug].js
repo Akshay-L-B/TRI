@@ -101,6 +101,7 @@ const Slug = ({ user }) => {
     localStorage.setItem("courseCode", CourseCode);
     router.push({
       pathname: "/video",
+      query: { courseCode: CourseCode },
     });
   };
   const handleUploadFile = (CourseCode) => {
