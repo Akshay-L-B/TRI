@@ -172,33 +172,6 @@ const Student = ({ logout }) => {
                   </svg>
                   <span className="mx-4 font-medium">My Account</span>
                 </button>
-                <Link
-                  href={{
-                    pathname: "/coursecart",
-                    query: {
-                      enrolledCourses: JSON.stringify(enrolledCourses),
-                      studentID,
-                    },
-                  }}
-                  className="flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 transform rounded-md dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M15 5V7M15 11V13M15 17V19M5 5C3.89543 5 3 5.89543 3 7V10C4.10457 10 5 10.8954 5 12C5 13.1046 4.10457 14 3 14V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V14C19.8954 14 19 13.1046 19 12C19 10.8954 19.8954 10 21 10V7C21 5.89543 20.1046 5 19 5H5Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-
-                  <span className="mx-4 font-medium">View Course Cart</span>
-                </Link>
                 <button
                   onClick={() => {
                     router.push({
@@ -461,37 +434,30 @@ const Student = ({ logout }) => {
                   )}
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+              <div className="relative w-full overflow-hidden border border-teal-500 hover:border-2 rounded-lg sm:w-[300px] transition-all">
                 {filteredData.map((course, index) => (
-                  <div
-                    key={index}
-                    className="bg-white p-6 rounded-lg shadow-md dark:bg-gray-800"
-                  >
-                    <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-200">
-                      {course.CourseTitle}
-                    </h2>
-                    <p className="text-gray-700 dark:text-gray-400 mb-4">
-                      <span className="font-bold">Language:</span>{" "}
-                      {course.Language}
-                    </p>
-                    <p className="text-gray-700 dark:text-gray-400 mb-4">
-                      <span className="font-bold">Instructor:</span>{" "}
-                      {course.Instructor}
-                    </p>
-                    <p className="text-gray-700 dark:text-gray-400">
-                      <span className="font-bold">Experience:</span>{" "}
-                      {course.Experience}
-                    </p>
-                    <p className="text-gray-700 dark:text-gray-400">
-                      <span className="font-bold">Pricing:</span>{" "}
-                      {course.Pricing}
-                    </p>
-                    <button
-                      onClick={() => handleCourseDetails(course)}
-                      className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue active:bg-blue-800"
-                    >
-                      View Course Details
-                    </button>
+                  <div key={index} className="mb-6">
+                    {/* Display course information in the card */}
+                    <img
+                      src={course.courseImageURL} // Use the appropriate property for the course image URL
+                      alt={`Course Cover - ${course.CourseCode}`}
+                      className="h-[200px] w-full object-cover transition-all duration-300 transform hover:scale-105"
+                    />
+                    <div className="p-3">
+                      <p className="text-lg font-semibold line-clamp-2 mb-2">
+                        {course.CourseName}
+                      </p>
+                      <span className="italic text-sm text-gray-500">
+                        {`Instructor: ${course.instructor}`}
+                      </span>
+                      {/* Add other course details as needed */}
+                      <button
+                        onClick={() => handleCourseDetails(course)}
+                        className="block mt-2 border-t border-teal-500 text-teal-500 hover:bg-teal-500 hover:text-white transition-all duration-300 text-center py-2"
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
