@@ -57,7 +57,10 @@ const CourseSchema = new mongoose.Schema(
       },
     },
     description: { type: String },
-    previewVideo: { type: String },
+    video: {
+      data: Buffer,
+      contentType: String,
+    },
     enrolledStudents: { type: [String], default: null },
     courseFeedback: [CourseFeedbackSchema],
   },

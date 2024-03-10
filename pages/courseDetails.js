@@ -283,7 +283,7 @@ const CourseDetails = () => {
       try {
         // Fetch course data from the API
         const response = await fetch(
-          `/api/studentdetails?StudentID=${StudentID}`
+          `/api/studentdetails?StudentID=${studentID}`
         );
         const data = await response.json();
         setFlashCards(data[0].enrolledCourses);
@@ -311,7 +311,7 @@ const CourseDetails = () => {
       try {
         // Fetch all tests from the API
         const response = await fetch(
-          `/api/getTest?StudentID=${StudentID}&CourseCode=${CourseCode}`
+          `/api/getTest?StudentID=${studentID}&CourseCode=${CourseCode}`
         );
         const data = await response.json();
         setAllTests(data);

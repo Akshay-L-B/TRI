@@ -5,6 +5,7 @@ const NewCourse = () => {
   const router = useRouter();
   const { staffID } = router.query;
 
+  // Multer configuration for handling file uploads
   const initialCourseData = {
     CourseName: "",
     CourseLanguage: "",
@@ -78,7 +79,7 @@ const NewCourse = () => {
     },
   });
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     setCourseData((prevData) => ({ ...prevData, previewVideo: file }));
   };
@@ -87,55 +88,6 @@ const NewCourse = () => {
     const value = e.target.value;
     setCourseData((prevData) => ({ ...prevData, [field]: value }));
   };
-  const extractClassSchedulesFromCourses = (courses) => {
-    const schedules = {};
-
-    courses.forEach((course) => {
-      Object.keys(course.classSchedules).forEach((week) => {
-        if (!schedules[week]) {
-          schedules[week] = {};
-        }
-
-        Object.keys(course.classSchedules[week]).forEach((day) => {
-          const slot = course.classSchedules[week][day];
-          if (slot) {
-            if (!schedules[week][day]) {
-              schedules[week][day] = [];
-            }
-            schedules[week][day].push(slot);
-          }
-        });
-      });
-    });
-
-    return schedules;
-  };
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch(`/api/allcourses?instructor=${staffID}`);
-        if (response.ok) {
-          const courses = await response.json();
-          console.log("Courses:", courses);
-
-          // Extracting class schedules from each course
-          const extractedSchedules = extractClassSchedulesFromCourses(courses);
-          console.log("Extracted Schedules:", extractedSchedules);
-
-          // Merge the extracted schedules into the state
-          setClassSchedules(extractedSchedules);
-        } else {
-          console.error("Failed to fetch courses");
-        }
-      } catch (error) {
-        console.error("An unexpected error occurred:", error);
-      }
-    };
-
-    if (staffID) {
-      fetchCourses();
-    }
-  }, [staffID]);
 
   const handleCreateCourse = async () => {
     try {
@@ -166,7 +118,7 @@ const NewCourse = () => {
 
       console.log(dataWithStaffID);
       console.log("dataWithStaffID" + dataWithStaffID);
-      const response = await fetch("/api/newcourse1", {
+      const response = await fetch("/api/newcourse", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -406,36 +358,20 @@ const NewCourse = () => {
                   <tr key={day}>
                     <td className="border p-2">{day}</td>
                     <td className="border p-2">
-                      {timeSlots.map((slot) => {
-                        const isSlotOccupied =
-                          classSchedules[courseData.selectedWeek]?.[
-                            day
-                          ]?.includes(slot) ||
-                          (
-                            extractedSchedules[courseData.selectedWeek]?.[
-                              day
-                            ] || []
-                          ).includes(slot);
-
-                        return (
-                          <button
-                            key={slot}
-                            onClick={() => handleSlotSelect(day, slot)}
-                            className={`p-1 m-1 border rounded ${
-                              isSlotOccupied
-                                ? "bg-red-500 text-white"
-                                : classSchedules[courseData.selectedWeek][
-                                    day
-                                  ] === slot
-                                ? "bg-blue-500 text-white"
-                                : "bg-white"
-                            }`}
-                            disabled={isSlotOccupied}
-                          >
-                            {slot}
-                          </button>
-                        );
-                      })}
+                      {timeSlots.map((slot) => (
+                        <button
+                          key={slot}
+                          onClick={() => handleSlotSelect(day, slot)}
+                          className={`p-1 m-1 border rounded ${
+                            classSchedules[courseData.selectedWeek][day] ===
+                            slot
+                              ? "bg-blue-500 text-white"
+                              : "bg-white"
+                          }`}
+                        >
+                          {slot}
+                        </button>
+                      ))}
                     </td>
                   </tr>
                 )

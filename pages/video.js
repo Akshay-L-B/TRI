@@ -85,6 +85,7 @@ export default function Video() {
           });
 
           if (emailResponse.ok) {
+            router.push(`/${roomId}`);
             const emailResult = await emailResponse.json();
             if (!emailResult.success) {
               console.error("Failed to send email:", emailResult.message);

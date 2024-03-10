@@ -8,45 +8,29 @@ const CreateTest = () => {
   const [questions, setQuestions] = useState([
     {
       question: "",
-      options: ["", "", "", ""],
       correctAnswer: "",
-      feedback: "",
     },
     {
       question: "",
-      options: ["", "", "", ""],
       correctAnswer: "",
-      feedback: "",
     },
     {
       question: "",
-      options: ["", "", "", ""],
       correctAnswer: "",
-      feedback: "",
     },
     {
       question: "",
-      options: ["", "", "", ""],
       correctAnswer: "",
-      feedback: "",
     },
     {
       question: "",
-      options: ["", "", "", ""],
       correctAnswer: "",
-      feedback: "",
     },
   ]);
 
   const handleInputChange = (questionIndex, field, value) => {
     const updatedQuestions = [...questions];
-    // If the field is "options", update the specific option value
-    if (field === "options") {
-      updatedQuestions[questionIndex].options = [...value.split(",")];
-    } else {
-      // Otherwise, update the field for the question
-      updatedQuestions[questionIndex][field] = value;
-    }
+    updatedQuestions[questionIndex][field] = value;
     setQuestions(updatedQuestions);
   };
 
@@ -100,24 +84,6 @@ const CreateTest = () => {
               className="border rounded-md px-3 py-2 w-full mt-1"
             />
           </label>
-          {Array.isArray(question.options) &&
-            question.options.map((option, optionIndex) => (
-              <label key={optionIndex} className="block mb-3">
-                Option {optionIndex + 1}:
-                <input
-                  type="text"
-                  value={option}
-                  onChange={(e) =>
-                    handleInputChange(
-                      index,
-                      "options",
-                      `${optionIndex + 1}. ${e.target.value}`
-                    )
-                  }
-                  className="border rounded-md px-3 py-2 w-full mt-1"
-                />
-              </label>
-            ))}
 
           <label className="block mb-3">
             Correct Answer:
